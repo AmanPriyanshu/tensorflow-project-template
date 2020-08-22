@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+from progress.spinner import Spinner
+import time
+
+def current():
+	file = open('.active', 'r')
+	line = file.read()
+	return line
+
+def project(name):
+	dirs = os.listdir('./')
+	if name in dirs:
+		print('Project with same name already present. Start one with another name.')
+		exit()
+	files = ['trainers', 'models', 'data', 'data_loader', 'preprocessors', 'results', 'executables']
+	files = ['./'+name]+['./'+name+'/'+f for f in files]
+	spinner = Spinner('Generating a New Project: ')
+	for f in files:
+		os.system('mkdir '+f)
+		time.sleep(0.1)
+		spinner.next()
+		time.sleep(0.1)
+		spinner.next()
+	print()
+	print('The project '+name+' has been initialised.')
+	file = open('.active', 'w')
+	file.write(name)
+	file.close()
+
+	print('Copy paste the data into the ./'+name+'/data/ directory.')
+
+def activate(name):
+	dirs = os.listdir('./')
+	if name in dirs:
+		print('Project found and set as active')
+		file = open('.active', 'w')
+		file.write(name)
+		file.close()
+	else:
+		print('Project with the name, <'+name+'> not found.')
+		exit()
+
+
+def preprocess(name):
+	path_folder = './'+current()+'/preprocessors/'
+	files = os.listdir(path_folder)
+	if name+'.py' in files:
+		ans = input('Preprocessor with same name already defined. Enter "Y" to replace it or anything else to stop this process:  ').lower()
+		if ans=='y' or ans=='yes':
+			pass
+		else:
+			print('Stopped Execution.')
+			exit()
+	path = path_folder+name+'.py'
+	base = """\
+### Do not duplicate or change the name of the function
+### preprocess and return x and y, make sure even if y 
+### is 1D array, convert it into a 2D one Both should 
+### ideally be numpy arrays
+
+def preprocess():
+
+	return x, y
+"""
+	file = open(path, 'w')
+	file.write(base)
+	file.close()
+	spinner = Spinner('Defining a new preprocessing function with the name:  '+ name+' ')
+	for _ in range(10):
+		time.sleep(0.1)
+		spinner.next()
+	os.system('kaa '+path)
+
+def model(name):
+	path_folder = './'+current()+'/models/'
+	files = os.listdir(path_folder)
+	if name+'.py' in files:
+		ans = input('Model with same name already defined. Enter "Y" to replace it or anything else to stop this process:  ').lower()
+		if ans=='y' or ans=='yes':
+			pass
+		else:
+			print('Stopped Execution.')
+			exit()
+	path = path_folder+name+'.py'
+	base = """\
+### Do not duplicate or change the name of the function
+### build_model and return the model defined by you.
+
+def build_model():
+
+	return model
+"""
+	file = open(path, 'w')
+	file.write(base)
+	file.close()
+	spinner = Spinner('Defining a new model with the name:  '+ name+' ')
+	for _ in range(10):
+		time.sleep(0.1)
+		spinner.next()
+	os.system('kaa '+path)
+
+def trainer(name):
+	path_folder = './'+current()+'/trainers/'
+	files = os.listdir(path_folder)
+	if name+'.py' in files:
+		ans = input('Trainer with same name already defined. Enter "Y" to replace it or anything else to stop this process:  ').lower()
+		if ans=='y' or ans=='yes':
+			pass
+		else:
+			print('Stopped Execution.')
+			exit()
+	path = path_folder+name+'.py'
+	base = """\
+import pandas as pd
+
+### Do not duplicate or change the name of the function
+### train, you can choose to include callbacks, save checkpoints 
+### and return basic results as results and the history (we are 
+### converting it to a pandas DataFrame before sending) of the model.
+
+def train(model):
+
+	history = pd.DataFrame(history)
+	return history, results
+"""
+	file = open(path, 'w')
+	file.write(base)
+	file.close()
+	spinner = Spinner('Defining a new trainer with the name:  '+ name+' ')
+	for _ in range(10):
+		time.sleep(0.1)
+		spinner.next()
+	os.system('kaa '+path)
+
+def data_loader(name):
+	path_folder = './'+current()+'/data_loader/'
+	files = os.listdir(path_folder)
+	if name+'.py' in files:
+		ans = input('A Data Loader with same name is already defined. Enter "Y" to replace it or anything else to stop this process:  ').lower()
+		if ans=='y' or ans=='yes':
+			pass
+		else:
+			print('Stopped Execution.')
+			exit()
+	path = path_folder+name+'.py'
+	base = """\
+import pandas as pd
+
+### Do not duplicate or change the name of the function
+### load(), and return x and y, make sure even if y 
+### is 1D array, convert it into a 2D one. Both should 
+### ideally be numpy arrays
+
+def load():
+
+	return x, y
+"""
+	file = open(path, 'w')
+	file.write(base)
+	file.close()
+	spinner = Spinner('Defining a new Data Loader with the name:  '+ name+' ')
+	for _ in range(10):
+		time.sleep(0.1)
+		spinner.next()
+	os.system('kaa '+path)
+
+def run(name):
+	path_folder = './'+current()+'/executables/'
+	files = os.listdir(path_folder)
+	if name+'.py' in files:
+		ans = input('A Executable with same name is already defined. Enter "Y" to replace it or anything else to stop this process:  ').lower()
+		if ans=='y' or ans=='yes':
+			pass
+		else:
+			print('Stopped Execution.')
+			exit()
+	path = path_folder+name+'.py'
+	base = """\
+import tensorlfow as tf
+import numpy as np
+from trainers.<name> import train
+from data_loader.<name> import load
+from models.<name> import build_model
+from preprocessors.<name> import preprocess
+
+
+### Here is the base template, you can use whichever loader, preprocessors, etc. 
+### you wish to use.
+
+def main():
+	x, y = load()
+	#x, y = preprocess() #Optional
+	model = build_model()
+	history, results = train(model)
+	history.to_csv('./project_name/results/'+<name>)
+	results.to_csv('./project_name/results/'+<name>)
+
+if __name__ == "__main__":
+	main()
+"""
+	file = open(path, 'w')
+	file.write(base)
+	file.close()
+	spinner = Spinner('Defining a new Exectuable with the name:  '+ name+' ')
+	for _ in range(10):
+		time.sleep(0.1)
+		spinner.next()
+	os.system('kaa '+path)
+
+def main():
+	parser = argparse.ArgumentParser(description='Flono is a Command Line Interface for laying waste to maually creating a template for ANN projects, specifically for tensorflow.', epilog='Check out the development @https://github.com/AmanPriyanshu/tensorflow-project-template')
+	parser.add_argument('--project', '--start', '-s', '-i', help='Initialise a tensorlfow project. Flono is a Command Line Interface for laying waste to maually creating a template for ANN projects, specifically for tensorflow.', type=project)
+	parser.add_argument('--model', '-m', help='Define a model using the terminal based editor:', type=model)
+	parser.add_argument('--trainer', '-t', help='Define the fit function for tensorlfow models:', type=trainer)
+	parser.add_argument('--preprocessor', '-p', help='Define a preprocessing function:', type=preprocess)
+	parser.add_argument('--data loader', '-dl', help='Define a function to load the data:', type=data_loader)
+	parser.add_argument('--run', '-r', '--execute', '-e', help='Run a well defined pipeline split the names of the processes using "$", if a particular thing is not entered the first file found by th esystem will be executed.', type=run)
+	parser.add_argument('--active', '-a', help='Set active project to <name>', type=activate)
+	args = parser.parse_args()
+
+if __name__ == '__main__':
+	main()
